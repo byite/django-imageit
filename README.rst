@@ -32,7 +32,6 @@ Usage
 
 
 * Add 'imageit to INSTALLED_APPS in your settings.py
-
     .. code-block:: python
 
         INSTALLED_APPS = [
@@ -43,8 +42,6 @@ Usage
 
 
 * Import Imageit model fields to use them in your models.
-    .. note:: Both Imageit fields inherit from the existing Django FileField meaning FileField kwargs (such as upload_to) are also accepted.
-
     .. code-block:: python
 
         from imageit.models import ScaleItImageField, CropItImageField
@@ -53,7 +50,20 @@ Usage
             scale_image = ScaleItImageField(max_width=100, max_height=100, quality=100, null=True, blank=True)
             crop_image = ScaleItImageField(max_width=1000, max_height=1000, quality=100, null=True, blank=True)
 
-If max_width, max_height or quality are not provided when instantiating the field, they will default to predefined values. If you wish to use your own custom defaults to override these, you can do so in your settings.py as follows:
+* Available Imageit field KWARGS
+    * max_width (int): Image will be scaled to the bounds of max_width in pixels (while retaining aspect ratio)
+    * max_height (int): Image will be scaled to the bounds of max_height in pixels (while retaining aspect ratio)
+    * quality (int): Quality in dpi of resampled images
+    * upscale (bool): Upscale images to the value of max_width/max_height?
+
+    .. note:: Imageit fields inherit from the existing Django `FileField <https://docs.djangoproject.com/en/3.2/ref/models/fields/#filefield>`_. Therefore FileField arguments are also accepted (such as upload_to).
+
+
+Options
+============
+Imageit provides many options to tailor functionality specifically for your use case. While specific dimensions for scaling can be set as arguments on a field-by-field basis, Imageit also allows for project wide defaults to be set if no value is provided at the field level.
+
+Imageit will default to 100dpi quality at maximum dimensions of 1000x1000, If you wish to use your own custom defaults, you can do so in your settings.py as follows:
 
 .. code-block:: python
 
