@@ -1,0 +1,32 @@
+{% load static %}
+<div class="imageit-container imageit-scaleit-container">
+    <div class="imageit-file-select-container">
+        <label class="imageit-pseudo-selector" {% if widget.attrs.id %}for="{{widget.attrs.id}}"{% endif %}><img class="imageit-selector-icon" src="{% static 'imageit/img/image-icon.svg' %}"/>Select image</label>
+        <input class="imageit-selector" type="{{ widget.type }}" name="{{ widget.name }}" {% include "django/forms/widgets/attrs.html" %}>
+        {% if not widget.required %}
+            <div>
+                <input class="imageit-clear-image-checkbox" hidden type="checkbox" name="{{ widget.checkbox_name }}" id="{{ widget.checkbox_id }}"{% if widget.attrs.disabled %} disabled{% endif %}>
+            </div>
+        {% endif %}
+    </div>
+    <div class="imageit-preview-container">
+        {% if widget.is_initial %}
+            <div class="imageit-preview imageit-initial">
+                <div class="imageit-preview-content">
+                    <a href="{{ widget.value.url }}" target="_blank">
+                        <img class="imageit-preview-image" alt="Image preview" src="{{ widget.value.url }}" />
+                    </a>
+                    <div class="imageit-preview-text">
+                        <p>
+                            <strong class="imageit-preview-help-text">{{ widget.initial_text }}</strong>
+                        </p>
+                        <hr>
+                        <p class="imageit-preview-filename">
+                            {{ widget.value.file.name }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
