@@ -5,6 +5,7 @@ class ImageitField{
         this.fileInput = element.querySelector('.imageit-selector');
         this.fileInputName = this.fileInput.name;
         this.fileInputMultiple = this.fileInput.multiple;
+        this.fileInputMaxSize = (this.fileInput.dataset.maxUploadSize * 1024 * 1024);
         this.clearCheckbox = this.field.querySelector('.imageit-clear-image-checkbox') || false;
         this.files = [];
         this.errors = [];
@@ -54,7 +55,13 @@ class ImageitField{
             this.errors.push({'code': 1001, 'file': '', 'message': 'Only one file is accepted!'});
         }else{
             (files).forEach(file =>{
-                this.addFile(file);
+                if (file.size > this.fileInputMaxSize){
+                    this.errors.push({'code': 1002, 'file': file.name, 'message': "File size is too large! <b>" + file.name + "</b> must be less than " + (this.fileInputMaxSize/1024/1024) + "MB"});
+                    this.manageFilesState();
+                    this.render();
+                }else{
+                    this.addFile(file);
+                }
             });
         }
     }
@@ -114,7 +121,6 @@ class ImageitField{
     manageFilesState(){
         let newFiles = this.newFiles();
 
-        console.log(this.files);
         for(let i = 0; i < this.files.length; i++){
             let item = this.files[i];
             
@@ -133,12 +139,19 @@ class ImageitField{
 
     //Removes any new (user selected) images from files
     clearNewImages(){
+        this.errors = [];
         for(var i=this.files.length - 1; i > 0; i--){
             let image = this.files[i];
             image.hidden = true;
             image.render();
             if (image.initial == false) this.files.splice(i, 1);
         }
+    }
+
+    //Removes any new (user selected) images from files
+    clearErrors(){
+        this.errors = [];
+        this.render();
     }
 
     //Render any previews in this field
@@ -154,6 +167,10 @@ class ImageitField{
                 errorElem.innerHTML = error.message;
                 renderContainer.append(errorElem);
             }
+        }else{
+            this.field.querySelectorAll('.imageit-error').forEach(function(el){
+                el.remove();
+            });
         }
 
         //Render out previews for each of the elements
@@ -172,7 +189,6 @@ class ImageitImg{
         this.fieldClass = fieldClass;
         this.hidden = false;
         this.removed = false;
-        this.errors = [];
 
         try{
             let obj = false;
@@ -181,13 +197,14 @@ class ImageitImg{
             }else{
                 obj = JSON.parse(data);
             }
+            this.errors = obj.errors || [];
             this._file = obj.file || false;
             this.fileName = obj.fileName || this._file.name || false;
             this.fileExtension = this.fileName.split('.').pop().toLowerCase() || false;
             this.initial = obj.initial || false;
             this.elem = obj.elem || false;
             this.descriptor = obj.descriptor || 'New';
-            this.removable = (fieldClass.clearCheckbox) ? true : false;     
+            this.removable = (fieldClass.clearCheckbox) ? true : false; 
         }catch (e){
             this.errors.push(e);
         }

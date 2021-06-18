@@ -13,6 +13,7 @@ from .settings import (
     IMAGEIT_DEFAULT_IMAGE_PROPS,
     IMAGEIT_ACCEPTED_CONTENT_TYPES,
     IMAGEIT_MAX_UPLOAD_SIZE_MB,
+    IMAGEIT_MAX_SAVE_SIZE_MB,
     IMAGEIT_SVG_CONTENT_TYPE
 )
 
@@ -38,6 +39,9 @@ def process_upload(data, img_props=None):
                     data = process_vector(data)
                 else:
                     data = process_raster(data, img_props)
+
+                if data.size > (IMAGEIT_MAX_SAVE_SIZE_MB * 1024 * 1024):
+                    raise ValidationError(_("Uploaded file exceeds maximum allowed size of %(size)sMB.") %{ 'size': IMAGEIT_MAX_SAVE_SIZE_MB}, code="file_invalid")
         else:
             raise ValidationError(_("Unsupported image format. Must be one of %(opts)s") % { 'opts': IMAGEIT_ACCEPTED_CONTENT_TYPES}, code='file_invalid')
     else:

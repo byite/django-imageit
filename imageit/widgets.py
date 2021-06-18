@@ -2,6 +2,9 @@ from django.core.exceptions import ImproperlyConfigured
 from django.forms.widgets import MultiWidget, ClearableFileInput
 from django.utils.translation import gettext_lazy as _
 
+from .settings import (
+    IMAGEIT_MAX_UPLOAD_SIZE_MB
+)
 
 class ScaleItImageWidget(ClearableFileInput):
     template_name = 'imageit/widgets/scale_it_widget.html'
@@ -11,6 +14,12 @@ class ScaleItImageWidget(ClearableFileInput):
         if kwargs.get('multiple') == True:
             raise ImproperlyConfigured(_('Scaleit image widget does not support multi-file selectors'), code="Disallowed widget attrs")
         super(ScaleItImageWidget, self).__init__(*args, **kwargs)
+
+    def get_context(self, name, value, attrs):
+        if not attrs.get("data-max_upload_size"):
+            attrs["data-max_upload_size"] = IMAGEIT_MAX_UPLOAD_SIZE_MB
+        context = super().get_context(name, value, attrs)
+        return context
 
     class Media:
         css = {"all": ('imageit/css/imageit.css',),}
@@ -24,6 +33,12 @@ class CropItImageWidget(MultiWidget):
         if kwargs.get('multiple') == True:
             raise ImproperlyConfigured(_('Cropit image widget does not support multi-file selectors'), code="Disallowed widget attrs")
         super(CropItImageWidget, self).__init__(*args, **kwargs)
+
+    def get_context(self, name, value, attrs):
+        if not attrs.get("data-max_upload_size"):
+            attrs["data-max_upload_size"] = IMAGEIT_MAX_UPLOAD_SIZE_MB
+        context = super().get_context(name, value, attrs)
+        return context
 
     def decompress(self, value):
         if value:

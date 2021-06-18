@@ -22,7 +22,7 @@ class ScaleItImageFormField(FileField):
         # If you want image in cleaned_data to be scaled/cropped
         # It must be completed here as model.clean is completed in form.post_clean
         # Img props will need to be passed from model.form_class
-        # Should probably validate crop inputs here
+            # Should probably validate crop inputs here
         return super().clean(data, initial)
 
 class CropItImageFormField(MultiValueField):
