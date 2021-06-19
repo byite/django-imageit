@@ -26,17 +26,6 @@ jobs:
       max-parallel: 4
       matrix:
         include:
-          - python-version: 3.6
-            django-version: Django==1.11
-
-          - python-version: 3.6
-            django-version: Django==2.0
-
-          - python-version: 3.6
-            django-version: Django==2.1
-
-          - python-version: 3.6
-            django-version: Django==2.2
 
           - python-version: 3.6
             django-version: Django==3.0
