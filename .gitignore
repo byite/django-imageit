@@ -137,5 +137,4 @@ node_modules
 *.idea
 *.swp
 *.out
-manage.py
 /test_media

@@ -1,28 +1,33 @@
 from setuptools import setup
 
-with open("README.md", "r") as fh:
+with open("README.rst", "r") as fh:
     long_description = fh.read()
 
 setup(
     name='django-imageit',
-    version='0.0.1',
+    version='0.0.2',
     url="https://github.com/scott-j5/django-imageit",
     author="Scott James",
     author_email="scottjames@byitegroup.com",
     description="Image processing plugin built for Django",
     packages=['imageit', 'imageit.tests'],
     long_description=long_description,
-    long_description_content_type="text/markdown",
+    long_description_content_type="text/x-rst",
 
     install_requires = [
         "django >= 3",
         "pillow > 8.0.0",
         "filetype > 1.0.0",
     ],
+    extras_require = {
+        "dev": [
+            "twine >= 3.4",
+        ]
+    },
     classifiers=[
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: MIT Licence',
-        'Operating System :: OS Independant',
+        'License :: OSI Approved :: MIT License',
+        'Operating System :: OS Independent',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
