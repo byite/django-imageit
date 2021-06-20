@@ -54,8 +54,6 @@ def process_upload(data, img_props=None):
                     data = process_raster(data, img_props)
                 
                 # Validate file size after resampling 
-                val_size = img_props.get('max_save_size_mb', IMAGEIT_MAX_SAVE_SIZE_MB)
-                print(f'{size} ---- {val_size * 1024 * 1024}')
                 if size > (img_props.get('max_save_size_mb', IMAGEIT_MAX_SAVE_SIZE_MB) * 1024 * 1024):
                     raise ValidationError(_("Uploaded file exceeds maximum allowed size of %(size)sMB.") %{ 'size': IMAGEIT_MAX_SAVE_SIZE_MB}, code="file_invalid")
         else:

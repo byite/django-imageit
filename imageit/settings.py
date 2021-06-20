@@ -4,7 +4,6 @@ from django.core.exceptions import ImproperlyConfigured
 
 def retrieve(name):
     try:
-        print(f'{name}')
         return getattr(settings, name, False)
     except ImproperlyConfigured:
         # To handle the auto-generation of documentations.
