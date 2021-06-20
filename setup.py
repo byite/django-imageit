@@ -5,12 +5,12 @@ with open("README.rst", "r") as fh:
 
 setup(
     name='django-imageit',
-    version='0.0.2',
+    version='0.0.3',
     url="https://github.com/scott-j5/django-imageit",
     author="Scott James",
     author_email="scottjames@byitegroup.com",
     description="Image processing plugin built for Django",
-    packages=['imageit', 'imageit.tests'],
+    packages=['imageit'],
     long_description=long_description,
     long_description_content_type="text/x-rst",
 
@@ -31,8 +31,12 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'Programming Language :: JavaScript',
         'Framework :: Django :: 3.0',
+        'Framework :: Django :: 3.1',
+        'Framework :: Django :: 3.2',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: Multimedia :: Graphics',
         'Topic :: Multimedia :: Graphics :: Presentation',

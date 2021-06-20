@@ -54,6 +54,7 @@ Usage
     * **max_width (int)**: Image will be scaled to the bounds of max_width in pixels (while retaining aspect ratio)
     * **max_height (int)**: Image will be scaled to the bounds of max_height in pixels (while retaining aspect ratio)
     * **quality (int)**: Quality in dpi of resampled images
+    * **max_save_size (int)**: Max size (mb) permitted for images after scaling/ resampling
     * **upscale (bool)**: Upscale images to the value of max_width/max_height?
 
     .. note:: Imageit fields inherit from the existing Django `FileField <https://docs.djangoproject.com/en/3.2/ref/models/fields/#filefield>`_. Therefore FileField arguments are also accepted (such as upload_to).
