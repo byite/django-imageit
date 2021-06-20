@@ -137,4 +137,4 @@ node_modules
 *.idea
 *.swp
 *.out
-/test_media
+/tests_media

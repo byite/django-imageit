@@ -1,0 +1,12 @@
+{
+    "python.linting.pylintEnabled": true,
+    "python.linting.pylintArgs": [
+        "--enable=W0614"
+    ],
+    "python.linting.enabled": true,
+    "python.autoComplete.extraPaths": [
+        "../lib/Python3.8/site-packages/",
+    ],
+    "python.autoComplete.addBrackets": true,
+    "python.pythonPath": "../bin/python3",
+}

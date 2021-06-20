@@ -1,3 +1,5 @@
+import sys
+
 from django.core.exceptions import ValidationError
 from django.core.files.base import File
 from django.utils.translation import gettext_lazy as _
@@ -28,10 +30,21 @@ def process_upload(data, img_props=None):
         if data.content_type is None:
             raise ValidationError(_("Unable to derive the content type of the file submitted"), code='file_invalid')
 
+        # Determine the size of the file
+        if hasattr(data, 'size'):
+            size = data.size
+        if hasattr(data, 'tell') and hasattr(data, 'seek'):
+            pos = data.tell()
+            data.seek(0, SEEK_END)
+            size = data.tell()
+            data.seek(pos)
+        else:
+            raise AttributeError("Unable to determine the file's size.")
+
         # Check to make sure image is an accepted content type
         if data.content_type in IMAGEIT_ACCEPTED_CONTENT_TYPES:
             # If file size exceeds max allowed, Raise error. Else process Image
-            if data.size > (IMAGEIT_MAX_UPLOAD_SIZE_MB * 1024 * 1024):
+            if size > (IMAGEIT_MAX_UPLOAD_SIZE_MB * 1024 * 1024):
                 raise ValidationError(_("Uploaded file exceeds maximum allowed size of %(size)sMB.") %{ 'size': IMAGEIT_MAX_UPLOAD_SIZE_MB}, code="file_invalid")
             else:
                 # Process vector or raster depending on file type
@@ -39,8 +52,11 @@ def process_upload(data, img_props=None):
                     data = process_vector(data)
                 else:
                     data = process_raster(data, img_props)
-
-                if data.size > (IMAGEIT_MAX_SAVE_SIZE_MB * 1024 * 1024):
+                
+                # Validate file size after resampling 
+                val_size = img_props.get('max_save_size_mb', IMAGEIT_MAX_SAVE_SIZE_MB)
+                print(f'{size} ---- {val_size * 1024 * 1024}')
+                if size > (img_props.get('max_save_size_mb', IMAGEIT_MAX_SAVE_SIZE_MB) * 1024 * 1024):
                     raise ValidationError(_("Uploaded file exceeds maximum allowed size of %(size)sMB.") %{ 'size': IMAGEIT_MAX_SAVE_SIZE_MB}, code="file_invalid")
         else:
             raise ValidationError(_("Unsupported image format. Must be one of %(opts)s") % { 'opts': IMAGEIT_ACCEPTED_CONTENT_TYPES}, code='file_invalid')
@@ -70,10 +86,7 @@ def contains_javascript(image):
     image.file.seek(0)
     file_str = str(image.file.read(), encoding='UTF-8')
 
-    # ------------------------------------------------
-    # Handles JavaScript nodes and stringified nodes.
-    # ------------------------------------------------
-    # Filters against "script" / "if (.)" / "for (.)" within node attributes.
+    # Filters against "script" / "if (.)" / "for (.)".
     pattern = r'(?i)(<\s*\bscript\b.*>.*?)|(.*\bif\b\s*\(.?.*\))|(.*\bfor\b\s*\(.*\))'
 
     found = search(
@@ -95,7 +108,6 @@ def contains_javascript(image):
         if '"' in val or "'" in val:
             return True
 
-    # It is (hopefully) safe.
     return False
 
 
@@ -134,6 +146,7 @@ def resize(image, img_props):
         bytes_image.seek(0, SEEK_END)
     except Exception as e:
         raise ValidationError(_("Error: %(e)s. There may be an issue with your image file.") % { 'e': e })
+    pil_image.close()
     image.file = bytes_image
     return image
 

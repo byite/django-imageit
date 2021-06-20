@@ -27,9 +27,6 @@ jobs:
       matrix:
         include:
 
-          - python-version: 3.6
-            django-version: Django==3.0
-
           - python-version: 3.7
             django-version: Django==2.2
 
@@ -40,7 +37,7 @@ jobs:
             django-version: Django==3.1
 
           - python-version: 3.9
-            django-version: Django==3.1
+            django-version: Django==3.2
 
     steps:
       - uses: actions/checkout@v2
