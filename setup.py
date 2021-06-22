@@ -5,7 +5,7 @@ with open("README.rst", "r") as fh:
 
 setup(
     name='django-imageit',
-    version='0.0.5',
+    version='0.0.6',
     url="https://github.com/byite/django-imageit",
     author="Scott James",
     author_email="scottjames@byitegroup.com",

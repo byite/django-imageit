@@ -1,7 +1,7 @@
 {% load static %}
 <div class="imageit-container imageit-scaleit-container">
     <div class="imageit-file-select-container">
-        <label class="imageit-pseudo-selector" {% if widget.attrs.id %}for="{{widget.attrs.id}}"{% endif %}><img class="imageit-selector-icon" src="{% static 'imageit/img/image-icon.svg' %}"/>Select image</label>
+        <label class="imageit-pseudo-selector" {% if widget.attrs.id %}for="{{widget.attrs.id}}"{% endif %}><img class="imageit-selector-icon" src="{% static 'imageit/dist/img/image-icon.svg' %}"/>Select image</label>
         <input class="imageit-selector" type="{{ widget.type }}" name="{{ widget.name }}" {% include "django/forms/widgets/attrs.html" %}>
         {% if not widget.required %}
             <div>
