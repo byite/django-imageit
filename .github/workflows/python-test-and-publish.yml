@@ -68,6 +68,16 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+      
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+      - name: Install Node dependancies
+        run: npm ci
+      - name: Node build
+        run: npm run build --if-present
+      
       - name: Build package
         run: |
           python setup.py bdist_wheel

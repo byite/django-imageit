@@ -22,8 +22,8 @@ class ScaleItImageWidget(ClearableFileInput):
         return context
 
     class Media:
-        css = {"all": ('imageit/css/imageit.css',),}
-        js = ('imageit/js/imageit.js',)
+        css = {"all": ('imageit/dist/css/imageit.css',),}
+        js = ('imageit/dist/js/imageit.js',)
 
 
 class CropItImageWidget(MultiWidget):
@@ -46,5 +46,5 @@ class CropItImageWidget(MultiWidget):
         return [None, 0, 0, 0, 0]
 
     class Media:
-        css = {"all": ('imageit/css/imageit.css', 'https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.9/cropper.min.css'),}
-        js = ('https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.9/cropper.min.js', '/static/imageit/js/imageit.js')
+        css = {"all": ('https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.9/cropper.min.css',),}
+        js = ('https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.9/cropper.min.js',)
