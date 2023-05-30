@@ -7,7 +7,7 @@
 
 .imageit-pseudo-selector{
     display:none;
-    width: calc(100% - 3rem - 2px) !important;
+    width: calc(100% - 2px) !important;
     padding: .5rem 1.5rem !important;
     background-color: rgb(121, 174, 200);
     border: 1px solid rgb(73, 164, 209);

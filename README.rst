@@ -18,11 +18,6 @@ Key features
 * Django Admin support.
 
 
-Documentation
-=============
-https://django-imageit.readthedocs.io/en/latest/
-
-
 Usage
 ============
 * Install django-imageit using pip
@@ -31,7 +26,7 @@ Usage
         pip install django-imageit
 
 
-* Add 'imageit to INSTALLED_APPS in your settings.py
+* Add 'imageit' to INSTALLED_APPS in your settings.py
     .. code-block:: python
 
         INSTALLED_APPS = [

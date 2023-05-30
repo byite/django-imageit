@@ -3,13 +3,16 @@ from setuptools import setup
 with open("README.rst", "r") as fh:
     long_description = fh.read()
 
+with open(os.path.join(mypackage_root_dir, 'VERSION')) as version_file:
+    version = version_file.read().strip()
+
 setup(
     name='django-imageit',
-    version='0.0.6',
+    version=version,
     url="https://github.com/byite/django-imageit",
     author="Scott James",
     author_email="scottjames@byitegroup.com",
-    description="Image processing plugin built for Django",
+    description="Image upload & processing plugin built for Django",
     packages=['imageit'],
     include_package_data=True,
     long_description=long_description,

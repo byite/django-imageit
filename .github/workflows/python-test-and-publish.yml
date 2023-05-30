@@ -20,6 +20,9 @@ on:
   workflow_dispatch:
   
 jobs:
+  auto-bump-version-minor:
+    uses: ./.github/workflows/auto-bump-version-minor.yml
+
   test:
     runs-on: ubuntu-latest
     strategy:
@@ -73,11 +76,13 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 14.x
+      - name: Bump Pkg Version
+        run: npm version minor
       - name: Install Node dependancies
         run: npm ci
       - name: Node build
         run: npm run build --if-present
-      
+
       - name: Build package
         run: |
           python setup.py bdist_wheel
