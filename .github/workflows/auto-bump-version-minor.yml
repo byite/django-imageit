@@ -34,8 +34,8 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 14.x
-      - name: Bump Node Package Version Minor
-        run: npm version minor --no-git-tag-version
+      - name: Bump Node Package Version Patch
+        run: npm version patch --no-git-tag-version
       - name: Commit report
         run: |
           git config --global user.name 'Scott James'

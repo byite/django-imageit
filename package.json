@@ -1,6 +1,6 @@
 {
   "name": "django-imageit",
-  "version": "0.1.0",
+  "version": "0.0.6",
   "description": "Django image processing plugin",
   "private": true,
   "directories": {
