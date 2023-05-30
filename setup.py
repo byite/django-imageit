@@ -1,3 +1,4 @@
+import os
 from setuptools import setup
 
 with open("README.rst", "r") as fh:
