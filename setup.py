@@ -4,7 +4,7 @@ from setuptools import setup
 with open("README.rst", "r") as fh:
     long_description = fh.read()
 
-with open(os.path.join(mypackage_root_dir, 'VERSION')) as version_file:
+with open("version.txt", "r") as version_file:
     version = version_file.read().strip()
 
 setup(
