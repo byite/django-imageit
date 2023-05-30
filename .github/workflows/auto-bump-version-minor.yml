@@ -23,13 +23,19 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2.3.2
-      - name: Modifiy basic version number minor
+      - name: Bump Python Package Version Minor
         run: |
           vers=$(<version.txt)
           majorvers=$(echo "$vers" | grep -o '.*\.')
           minorvers=$(echo "$vers" | grep -o '[0-9]*$')
           newminor=$((minorvers + 1))
           echo "$majorvers$newminor" > version.txt
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+      - name: Bump Node Package Version Minor
+        run: npm version minor
       - name: Commit report
         run: |
           git config --global user.name 'Scott James'

@@ -75,8 +75,6 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 14.x
-      - name: Bump Pkg Version
-        run: npm version minor
       - name: Install Node dependancies
         run: npm ci
       - name: Node build
