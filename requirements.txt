@@ -4,7 +4,7 @@ certifi==2021.5.30
 chardet==4.0.0
 colorama==0.4.4
 Django==3.2.4
--e git+https://github.com/scott-j5/django-imageit@8e1bfcecf4bec0c337d53018425556db8f9e51ae#egg=django_imageit
+-e git+https://github.com/scott-j5/django-imageit@862c99777564d0fecc1fc0a69b105dbc7e1efd39#egg=django_imageit
 docutils==0.17.1
 filetype==1.0.7
 idna==2.10
