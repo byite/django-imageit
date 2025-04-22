@@ -312,7 +312,7 @@ class ImageitImg{
 
     //Determines if rendering is nessacary and completes it
     _render(container, elem){
-        //Only render element if the generated dome element differs from current this.elem
+        //Only render element if the generated dom element differs from current this.elem
         if(elem instanceof Element && (!this.elem || !this.elem.isEqualNode(elem))){
             if (this.elem){
                 container.insertBefore(elem, this.elem)

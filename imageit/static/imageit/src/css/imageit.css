@@ -102,10 +102,14 @@
 }
 
 .imageit-error {
-  width: 100%;
-  padding: 1rem 0px;
+  /*width: 99%;*/
+  margin: .5%;
+  padding: .5rem 0px;
   text-align: center;
-  color: #ff3466;
+  color: #dc3545;
+  background-color: #f8d7da;
+  border: 2px dashed #f5c6cb;
+  border-radius: 5px; 
 }
 
 /* SCALEIT STYLES */

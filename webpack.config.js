@@ -36,7 +36,7 @@ module.exports = {
         ]
     }),
   ],
-  optimization: {
+  /*optimization: {
     minimize: true,
     minimizer: [
       new TerserPlugin({
@@ -48,5 +48,5 @@ module.exports = {
       new CssMinimizerPlugin(),
     ],
     runtimeChunk: false
-  },
+  },*/
 };
