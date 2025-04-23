@@ -1,5 +1,6 @@
 type ImageitInputChangeCallback = (input: ImageitInput) => void;
 type ImageProcessedCallback = (file: InputtedFile) => void;
+type ToggleOptions = 'clear' | 'delete' | 'undo';
 
 class ImageitInputHandler {
     private imageitInputs: ImageitInput[] = [];
@@ -10,9 +11,13 @@ class ImageitInputHandler {
             throw new Error(`No file input fields found with selector "${fileInputSelector}"`);
         }
         fileInputs.forEach((fileInput) => {
-            let currentInput = new ImageitInput(fileInput, onFileChangeCallback);
+            let currentInput: ImageitInput | CropitInput; 
+            if(fileInput.closest('.imageit-cropit-container')){
+                currentInput = new CropitInput(fileInput, onFileChangeCallback);
+            }else{
+                currentInput = new ImageitInput(fileInput, onFileChangeCallback);
+            }
             this.imageitInputs.push(currentInput);
-            
         });
     }
 }
@@ -114,13 +119,15 @@ class ImageitInput {
 
     // Remove Initial file and check clear checkbox to prompt django to remove the image in the backend
     private toggleDeletion(){
+        console.log(this);
         this.clearCheckbox.checked = ! this.clearCheckbox.checked;
         console.log('marked for deletion');
         this.renderPreview();
     }
 
     // Remove any user inputted files
-    private removeInputtedFile(){
+    private toggleClear(){
+        console.log(this);
         this.inputtedFiles = [];
         this.fileInput.value = '';
         this.renderPreview();
@@ -140,15 +147,15 @@ class ImageitInput {
                 const html = await file.generatePreviewHTML();
                 previewContainer.innerHTML += html;
             }
-            previewContainer.appendChild(this.appendClear());
+            previewContainer.appendChild(this.appendDiv('clear'));
             console.log('rendering inputted files');
         }else if(this.initial){
             if (!this.clearCheckbox.checked){
                 const html = await this.initial.generatePreviewHTML();
                 previewContainer.innerHTML += html;
-                previewContainer.appendChild(this.appendDelete());
+                previewContainer.appendChild(this.appendDiv('delete'));
             }else{
-                previewContainer.appendChild(this.appendUndo());
+                previewContainer.appendChild(this.appendDiv('undo'));
             };
             console.log('rendering initial');
         }else{
@@ -171,30 +178,16 @@ class ImageitInput {
     }
 
     //Appeand a clear button to remove inputted files
-    appendClear(){
-        const clearDiv = document.createElement('div');
-        clearDiv.classList.add('imageit-clear');
-        clearDiv.textContent = 'CLEAR';
-        clearDiv.addEventListener('click', event => {this.removeInputtedFile()});
-        return clearDiv;
-    }
-
-    //Appeand a delete button to remove inputted files
-    appendDelete(){
-        const deleteDiv = document.createElement('div');
-        deleteDiv.classList.add('imageit-delete');
-        deleteDiv.textContent = 'DELETE';
-        deleteDiv.addEventListener('click', event => {this.toggleDeletion()});
-        return deleteDiv;
-    }
-
-    //Appeand an undo button to remove inputted files
-    appendUndo(){
-        const undoDiv = document.createElement('div');
-        undoDiv.classList.add('imageit-undo');
-        undoDiv.textContent = 'UNDO';
-        undoDiv.addEventListener('click', event => {this.toggleDeletion()});
-        return undoDiv;
+    appendDiv(context: ToggleOptions){
+        const newDiv = document.createElement('div');
+        newDiv.classList.add('imageit-toggle', `imageit-${context}`);
+        newDiv.textContent = context.charAt(0).toUpperCase() + context.slice(1);
+        let func = this.toggleClear.bind(this);
+        if (context == 'delete' || context == 'undo'){
+            func = this.toggleDeletion.bind(this);
+        }
+        newDiv.addEventListener('click', event => { func()});
+        return newDiv;
     }
 }
 
@@ -303,6 +296,24 @@ class InputtedFile extends ImageitFile{
             return {result: false, data: this.errors};
         }
         return {result: true, data: ['']} // All files pass validation
+    }
+}
+
+class CropitInput extends ImageitInput{
+    cropValInputs: HTMLInputElement[] = [];
+
+    constructor(fileInputSelector: HTMLInputElement, onFileChangeCallback: ImageitInputChangeCallback){
+        super(fileInputSelector, onFileChangeCallback);
+        this.retrieveCropInputs();
+    }
+
+    // Retrieve inputs for crop coordinates and add them to this.cropValInputs
+    retrieveCropInputs(){
+        let inputPrefix = this.fileInput.name.slice(0, -1);
+        for(var i = 1; i <= 4; i++){
+            console.log(this.container.querySelector('input[name="' + inputPrefix + i + '"]'));
+            this.cropValInputs.push(this.container.querySelector('input[name="' + inputPrefix + i + '"]'));
+        }
     }
 }
 
