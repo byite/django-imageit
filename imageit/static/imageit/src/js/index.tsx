@@ -1,8 +1,10 @@
-import Cropper from 'cropperjs';
+import Cropper, { CropperViewer, CropperImage, CropperCanvas, CropperSelection } from 'cropperjs';
+import type { Selection } from '@cropper/element-selection';
 
 type ImageitInputChangeCallback = (input: ImageitInput) => void;
 type ImageProcessedCallback = (file: InputtedFile) => void;
 type ToggleOptions = 'clear' | 'delete' | 'undo';
+type WithinOptions = 'image' | 'canvas' | 'none';
 
 class ImageitInputHandler {
     private imageitInputs: ImageitInput[] = [];
@@ -336,6 +338,7 @@ class CropitInput extends ImageitInput{
     inputtedFiles: InputtedCropFile[] = [];
     cropValInputs: HTMLInputElement[] = [];
     cropVals: number[] = [];
+    within: WithinOptions = 'canvas';
     
     constructor(fileInputSelector: HTMLInputElement, onFileChangeCallback: ImageitInputChangeCallback){
         super(fileInputSelector, onFileChangeCallback);
@@ -343,16 +346,185 @@ class CropitInput extends ImageitInput{
     }
 
     initListeners(onFileChangeCallback: ImageitInputChangeCallback){
-        // Listen for changes in the file input
+        // Listen for changes in the file input.
+        //Add Listeners for changes to the cropper when it is created.
         super.initListeners(onFileChangeCallback);
         this.container?.addEventListener('imageit:rendered', (e: CustomEvent) => {
             if(this.inputtedFiles.length >0){
-                console.log('Preview completed in this container:', e.detail);
-                let cropperElem = this.container.querySelector('.imageit-cropper-image') as HTMLImageElement;
-                const cropper = new Cropper(cropperElem);
-                cropperElem.addEventListener('crop', this.setCropVals.bind(this), false);
+                let cropper = this.initCropper(this.container.querySelector('.imageit-cropper-image') as HTMLImageElement)
+                cropper.getCropperSelection().addEventListener('change', (event: CustomEvent) => {this.selectionChange(event, cropper)});
+                cropper.getCropperImage().addEventListener('transform', (event: CustomEvent) => {this.imageTransform(event, cropper)});
             }
         });
+    }
+
+    selectionChange(event: CustomEvent, cropper: Cropper){
+        const cropperCanvas = cropper.getCropperCanvas() as CropperCanvas;
+
+        if (!cropperCanvas || this.within === 'none') {
+          return;
+        }
+  
+        const selection = event.detail as Selection;
+  
+        switch (this.within) {
+          case 'canvas': {
+            const maxSelection = this.canvasBounds(cropper);
+  
+            if (!this.inSelection(selection, maxSelection)) {
+              event.preventDefault();
+            }
+            break;
+          }
+  
+          case 'image': {
+            const maxSelection = this.imgBounds(cropper);
+  
+            if (!this.inSelection(selection, maxSelection)) {
+              event.preventDefault();
+            }
+            break;
+          }
+          default:
+        }
+        this.setCropVals(this.calcCropperSelectionCoords(event, cropper));
+    }
+
+    imageTransform(event: CustomEvent, cropper: Cropper){
+        const cropperCanvas = cropper.getCropperCanvas() as CropperCanvas;
+
+        if (!cropperCanvas || this.within !== 'image') {
+          return;
+        }
+  
+        const cropperImage = cropper.getCropperImage() as CropperImage;
+        const cropperSelection = cropper.getCropperSelection() as CropperSelection;
+        const cropperCanvasRect = cropperCanvas.getBoundingClientRect();
+  
+        // 1. Clone the cropper image.
+        const cropperImageClone = cropperImage.cloneNode() as CropperImage;
+  
+        // 2. Apply the new matrix to the cropper image clone.
+        cropperImageClone.style.transform = `matrix(${event.detail.matrix.join(', ')})`;
+  
+        // 3. Make the cropper image clone invisible.
+        cropperImageClone.style.opacity = '0';
+  
+        // 4. Append the cropper image clone to the cropper canvas.
+        cropperCanvas.appendChild(cropperImageClone);
+  
+        // 5. Compute the boundaries of the cropper image clone.
+        const cropperImageRect = cropperImageClone.getBoundingClientRect();
+  
+        // 6. Remove the cropper image clone.
+        cropperCanvas.removeChild(cropperImageClone);
+  
+        const selection = cropperSelection as Selection;
+        const maxSelection: Selection = {
+          x: cropperImageRect.left - cropperCanvasRect.left,
+          y: cropperImageRect.top - cropperCanvasRect.top,
+          width: cropperImageRect.width,
+          height: cropperImageRect.height,
+        };
+  
+        if (!this.inSelection(selection, maxSelection)) {
+          event.preventDefault();
+        }
+        this.setCropVals(this.calcCropperSelectionCoords(event, cropper));
+    }
+
+    initCropper(imgElem: HTMLImageElement){
+        let cropper = new Cropper(imgElem);
+
+        let cropperCanvas = cropper.getCropperCanvas();
+        let cropperImage = cropper.getCropperImage();
+        let cropperSelection = cropper.getCropperSelection();
+
+        cropperCanvas.style.minHeight = '300px';
+        cropperImage.initialCenterSize = 'contain';
+        
+        cropperImage.$ready(() => {
+            //cropperImage.scalable = false;
+            /*const cropperImageRect = cropperImage.getBoundingClientRect();
+            const cropperCanvasRect = cropperCanvas.getBoundingClientRect();
+            cropperSelection.$change(cropperImageRect.left - cropperCanvasRect.left + 5, cropperImageRect.top - cropperCanvasRect.top + 5, cropperImageRect.width - 10, cropperImageRect.height - 10);
+            
+            cropperImage.addEventListener('transform', (event: any) => {
+                console.log('transforming');
+                //this.constrainSelection(cropper, selection, maxSelection);
+            });
+            
+            cropperSelection.addEventListener('change', (event: any) => {
+                const selection = event.detail as Selection;
+                const maxSelection = this.imgBounds(cropper);
+
+                this.setCropVals(event, cropperImage, maxSelection);
+
+                if (!this.inSelection(selection, maxSelection)) {
+                    console.log('Prevented');
+                    this.constrainSelection(cropper, selection, maxSelection);
+                    //event.preventDefault();
+                }
+            });*/
+        });
+        
+        return cropper;
+    };
+
+    inSelection(selection: Selection, maxSelection: Selection) {
+        return (
+          selection.x >= maxSelection.x
+          && selection.y >= maxSelection.y
+          && (selection.x + selection.width) <= (maxSelection.x + maxSelection.width)
+          && (selection.y + selection.height) <= (maxSelection.y + maxSelection.height)
+        );
+    }
+
+    imgBounds(cropper: Cropper): Selection{
+        let cropperCanvas = cropper.getCropperCanvas();
+        let cropperImage = cropper.getCropperImage();
+
+        const cropperCanvasRect = cropperCanvas.getBoundingClientRect();
+        const cropperImageRect = cropperImage.getBoundingClientRect();
+        
+        const maxSelection: Selection = {
+            x: cropperImageRect.left - cropperCanvasRect.left,
+            y: cropperImageRect.top - cropperCanvasRect.top,
+            width: cropperImageRect.width,
+            height: cropperImageRect.height,
+        };
+        
+        return maxSelection;
+    };
+
+    canvasBounds(cropper: Cropper): Selection{
+        let cropperCanvas = cropper.getCropperCanvas();
+        let cropperImage = cropper.getCropperImage();
+
+        const cropperCanvasRect = cropperCanvas.getBoundingClientRect();
+        const cropperImageRect = cropperImage.getBoundingClientRect();
+        
+        const maxSelection: Selection = {
+            x: cropperImageRect.left - cropperCanvasRect.left,
+            y: cropperImageRect.top - cropperCanvasRect.top,
+            width: cropperImageRect.width,
+            height: cropperImageRect.height,
+        };
+        
+        return maxSelection;
+    };
+
+    constrainSelection(cropper: Cropper, selection: Selection, maxSelection: Selection){
+        let cropperSelection = cropper.getCropperSelection();
+        let x = Math.max(selection.x, maxSelection.x);
+        let y = Math.max(selection.y, maxSelection.y);
+        let width = Math.min(selection.width, maxSelection.width);
+        let height = Math.min(selection.height, maxSelection.height);
+        console.log(`X: ${selection.x}, X max ${maxSelection.x}`);
+        console.log(`Y: ${selection.y}, Y max ${maxSelection.y}`);
+        console.log(`Width: ${selection.width}, Width max ${maxSelection.width}`);
+        console.log(`Height: ${selection.height}, Height max ${maxSelection.height}`);
+        cropperSelection.$change(x-5, y-5, width-5, height -5);
     }
 
     processInput(){
@@ -380,8 +552,71 @@ class CropitInput extends ImageitInput{
         }
     }
 
+    calcCropperSelectionCoords(event: CustomEvent, cropper: Cropper){
+        const selection = event.detail as Selection;
+        let cropperCanvas = cropper.getCropperCanvas();
+        let cropperImage = cropper.getCropperImage();
+
+        const cropperCanvasRect = cropperCanvas.getBoundingClientRect();
+        const cropperImageRect = cropperImage.getBoundingClientRect();
+
+        const calculatedSelection: Selection = {
+            x: selection.x - cropperImageRect.left + cropperCanvasRect.left,
+            y: selection.y - cropperImageRect.top + cropperCanvasRect.top,
+            width: cropperImageRect.width / cropperImage.$getTransform()[0],
+            height: cropperImageRect.height / cropperImage.$getTransform()[3],
+        };
+        return calculatedSelection;
+        /*console.log(`Canvas Rect ${cropperCanvasRect.left}, ${cropperCanvasRect.top}, ${cropperCanvasRect.width}, ${cropperCanvasRect.height}`);
+        console.log(`Img Rect ${cropperImageRect.left}, ${cropperImageRect.top}, ${cropperImageRect.width}, ${cropperImageRect.height}`);
+        console.log(`Selection ${selection.x}, ${selection.y}, ${selection.width}, ${selection.height}`);
+        console.log(`Calc ${calculatedSelection.x}, ${calculatedSelection.y}, ${calculatedSelection.width}, ${calculatedSelection.height}`);*/
+    }
+
+
     //Apply coordinates of crop to the relevant input fields
-    setCropVals(e: CustomEvent<{ x: number; y: number; width: number; height: number }>){
+    setCropVals(selection: Selection){
+        console.log(`event detail start x: ${selection.x}`);
+        console.log(`event detail width: ${selection.width}`);
+        console.log(`event detail start y: ${selection.y}`);
+        console.log(`event detail height: ${selection.height}`);
+
+        /*
+        Turn off cropper image scalable
+        Get cropper selection values
+
+        Calculate image position and then translate selection values to suit
+        Constrain the selection window
+
+        this.cropVals = [
+            e.detail.x,
+            e.detail.y,
+            e.detail.x + e.detail.width,
+            e.detail.y + e.detail.height
+        ];
+
+        for( var i=0; i < this.cropValInputs.length; i++){
+            let inputField = this.cropValInputs[i];
+            inputField.valueAsNumber = this.cropVals[i];
+        }*/
+    }
+    }
+
+    //Apply coordinates of crop to the relevant input fields
+    //setCropVals(e: CustomEvent, image: CropperImage, maxSelection: Selection){
+        /*console.log(`event detail start x: ${e.detail.x - maxSelection.x}`);
+        console.log(`event detail width: ${e.detail.width / image.$getTransform()[0]}`);
+        console.log(`event detail start y: ${e.detail.y - maxSelection.y}`);
+        console.log(`event detail height: ${e.detail.height /  image.$getTransform()[3]}`);
+        console.log(`Image transform ${image.$getTransform()}`)*/
+
+        /*
+        Turn off cropper image scalable
+        Get cropper selection values
+
+        Calculate image position and then translate selection values to suit
+        Constrain the selection window
+
         this.cropVals = [
             e.detail.x,
             e.detail.y,
@@ -394,7 +629,7 @@ class CropitInput extends ImageitInput{
             inputField.valueAsNumber = this.cropVals[i];
         }
     }
-}
+}*/
 
 window.addEventListener("DOMContentLoaded", function(){
     // Instantiate the ImageitInputHandler
